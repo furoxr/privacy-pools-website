@@ -26,7 +26,7 @@ import { ExitMessage } from './ExitMessage';
 import { PoolAccountSection } from './PoolAccountSection';
 
 export const ReviewModal = () => {
-  const { isClosable, setModalOpen } = useModal();
+  const { isClosable, setModalOpen, modalOpen } = useModal();
   const { deposit, isLoading: isDepositLoading } = useDeposit();
   const { isLoading: isWithdrawLoading } = useWithdraw();
   const { isLoading: isExitLoading } = useExit();
@@ -160,8 +160,8 @@ export const ReviewModal = () => {
 
   // Reset isConfirmClicked when modal opens or when starting a new action
   useEffect(() => {
-    setIsConfirmClicked(false);
-  }, [actionType, amount, target]);
+    if (modalOpen === ModalType.REVIEW) setIsConfirmClicked(false);
+  }, [modalOpen, actionType, amount, target]);
 
   return (
     <BaseModal type={ModalType.REVIEW} hasBackground isClosable={isClosable}>
