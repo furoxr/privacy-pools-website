@@ -38,8 +38,10 @@ export const getEnv = (): Env => {
  * @returns The ASP endpoint URL for the specified chain
  */
 export const getAspEndpointForChain = (chainId: number): string => {
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === 'true') return env.ASP_ENDPOINT_TEST;
   // Testnet chain IDs
   const testnetChainIds = [
+    31337, // Local self-hosted Anvil validation
     11155111, // Sepolia
     11155420, // Optimism Sepolia
   ];

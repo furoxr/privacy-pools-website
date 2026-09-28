@@ -95,7 +95,11 @@ export const DataSection = () => {
   const aspDataFees = (vettingFeeBPS * parseUnits(amount, decimals)) / 100n / 100n;
   const aspOrRelayer = {
     label: isDeposit ? 'ASP' : 'Relayer',
-    value: isDeposit ? '0xBow ASP' : currentSelectedRelayerData?.name,
+    value: isDeposit
+      ? process.env.NEXT_PUBLIC_SELF_HOSTED === 'true'
+        ? 'Local test ASP'
+        : '0xBow ASP'
+      : currentSelectedRelayerData?.name,
   };
 
   const fromAddress = isDeposit ? address : '';
@@ -134,7 +138,11 @@ export const DataSection = () => {
   const feesCollectorAddress = isDeposit
     ? selectedPoolInfo.entryPointAddress
     : currentSelectedRelayerData?.relayerAddress;
-  const feesCollectorName = isDeposit ? '0xBow' : currentSelectedRelayerData?.name || 'Relayer';
+  const feesCollectorName = isDeposit
+    ? process.env.NEXT_PUBLIC_SELF_HOSTED === 'true'
+      ? 'Test Entrypoint'
+      : '0xBow'
+    : currentSelectedRelayerData?.name || 'Relayer';
   const feesCollector = `${feesCollectorName} (${truncateAddress(feesCollectorAddress)})`;
 
   // Use alternative token symbol if selected

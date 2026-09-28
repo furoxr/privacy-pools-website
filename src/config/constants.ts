@@ -16,7 +16,7 @@ const constants: Constants = {
     { label: 'Terms', href: 'https://docs.privacypools.com/toc' },
     { label: 'Privacy', href: 'https://docs.privacypools.com/privacy-policy' },
   ],
-  ASP_OPTIONS: ['0xBow ASP'],
+  ASP_OPTIONS: [process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' ? 'Local test ASP' : '0xBow ASP'],
   COOKIES: {
     USER_LOGGED: { name: 'userLogged', value: 'true' },
     USER_CONNECTED: { name: 'userConnected', value: 'true' },
@@ -24,7 +24,9 @@ const constants: Constants = {
   ITEMS_PER_PAGE: 12,
   TOC_URL: 'https://docs.privacypools.com/toc',
   PENDING_STATUS_MESSAGE:
-    'The ASP is validating that the funds are coming from a good actor. Estimated period: Up to 7 days.',
+    process.env.NEXT_PUBLIC_SELF_HOSTED === 'true'
+      ? 'Waiting for the test ASP to index the deposit and confirm its approval on chain.'
+      : 'The ASP is validating that the funds are coming from a good actor. Estimated period: Up to 7 days.',
   DEFAULT_ASSET: 'ETH',
 };
 

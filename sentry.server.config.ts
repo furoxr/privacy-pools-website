@@ -14,11 +14,11 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs';
-import { getConfig } from '~/config';
+import { getEnv } from '~/config/env';
 import { privateServerErrorEvent } from '~/utils/telemetry';
 
 Sentry.init({
-  dsn: getConfig().env.SENTRY_DSN,
+  dsn: getEnv().SENTRY_DSN,
   defaultIntegrations: false,
   integrations: [],
   sendDefaultPii: false,

@@ -38,7 +38,7 @@ export const SuccessModal = () => {
           Go to Dashboard
         </Button>
 
-        {actionType === EventType.DEPOSIT && (
+        {actionType === EventType.DEPOSIT && process.env.NEXT_PUBLIC_SELF_HOSTED !== 'true' && (
           <Typography variant='caption' color='text.secondary' sx={{ textAlign: 'center', fontSize: '1.1rem' }}>
             * On rare occasions deposits take longer to get reviewed but you can exit anytime.
           </Typography>

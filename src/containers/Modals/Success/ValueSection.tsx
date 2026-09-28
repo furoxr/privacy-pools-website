@@ -54,9 +54,11 @@ export const ValueSection = () => {
       {actionType === EventType.DEPOSIT && (
         <>
           <Text variant='body2'>
-            The ASP will validate that the funds are coming from a good actor (not a flagged account).
+            {process.env.NEXT_PUBLIC_SELF_HOSTED === 'true'
+              ? 'The test ASP automatically approves indexed deposits after the approval transaction confirms.'
+              : 'The ASP will validate that the funds are coming from a good actor (not a flagged account).'}
           </Text>
-          <Strong>Estimated period: 1 hour*</Strong>
+          {process.env.NEXT_PUBLIC_SELF_HOSTED !== 'true' && <Strong>Estimated period: 1 hour*</Strong>}
         </>
       )}
     </Container>

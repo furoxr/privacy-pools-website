@@ -24,7 +24,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang='en' suppressHydrationWarning>
       <body className={ibm_plex_mono.className}>
-        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || 'G-D177C1SMBP'} />
+        {process.env.NEXT_PUBLIC_SELF_HOSTED !== 'true' && (
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || 'G-D177C1SMBP'} />
+        )}
         <AppRouterCacheProvider>
           <InitColorSchemeScript attribute='class' />
 
@@ -40,6 +42,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 </NoScriptMessage>
 
                 <Header />
+                {process.env.NEXT_PUBLIC_SELF_HOSTED === 'true' && (
+                  <p style={{ textAlign: 'center', padding: '8px 16px', color: '#e7aa45' }}>
+                    Self-hosted test deployment · Deposits are automatically approved · USD valuations unavailable
+                  </p>
+                )}
                 <MainContent data-testid='main-content'>{children}</MainContent>
                 <Footer />
               </PageWrapper>

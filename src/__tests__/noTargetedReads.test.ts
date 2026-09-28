@@ -32,6 +32,9 @@ const RULES: Rule[] = [
   {
     pattern: /eth_getTransactionReceipt|eth_getTransactionByHash|trace_transaction|debug_traceTransaction/,
     reason: 'a raw RPC call that names a transaction hash.',
+    // Method allow-list only: this server proxy forwards the existing wallet
+    // requests, without introducing any client-side transaction lookups.
+    allow: ['src/app/api/sepolia-rpc/route.ts'],
   },
   {
     pattern: /\.getTransactionReceipt\(|\.getTransaction\(/,

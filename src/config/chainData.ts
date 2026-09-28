@@ -1,5 +1,5 @@
 import { Address, parseEther, parseUnits } from 'viem';
-import { arbitrum, base, bsc, Chain, mainnet, optimism, optimismSepolia, sepolia } from 'viem/chains';
+import { anvil, arbitrum, base, bsc, Chain, mainnet, optimism, optimismSepolia, sepolia } from 'viem/chains';
 import { readCustomRpcMap } from '~/config/customRpc';
 import { getAspEndpointForChain, getEnv } from '~/config/env';
 import { sUSDSAbi } from '~/config/sUSDSAbi';
@@ -30,7 +30,9 @@ const { ALCHEMY_KEY, IS_TESTNET, SHOW_TEST_CHAINS } = getEnv();
 
 // Add chains to the whitelist to be used in the app
 const mainnetChains: readonly [Chain, ...Chain[]] = [mainnet, optimism, base, bsc, arbitrum];
-const testnetChains: readonly [Chain, ...Chain[]] = [sepolia, optimismSepolia];
+const SELF_HOSTED = process.env.NEXT_PUBLIC_SELF_HOSTED === 'true';
+const SELF_HOSTED_CHAIN = process.env.NEXT_PUBLIC_SELF_HOSTED_CHAIN_ID === '31337' ? anvil : sepolia;
+const testnetChains: readonly [Chain, ...Chain[]] = SELF_HOSTED ? [SELF_HOSTED_CHAIN] : [sepolia, optimismSepolia];
 
 export const whitelistedChains = IS_TESTNET ? testnetChains : mainnetChains;
 
@@ -686,7 +688,39 @@ const applyCustomRpcOverrides = (data: ChainData): ChainData => {
 // Export chain data based on environment
 // For All Pools page: show both mainnet and testnet if SHOW_TEST_CHAINS is true
 // For wallet operations: only show appropriate chains based on IS_TESTNET
-export const chainData = applyCustomRpcOverrides(IS_TESTNET ? testnetChainData : mainnetChainData);
+const selfHostedChainData = (): ChainData => {
+  if (!IS_TESTNET) throw new Error('Self-hosted deployment requires NEXT_PUBLIC_IS_TESTNET=true');
+  const pool = process.env.NEXT_PUBLIC_POOL_ADDRESS;
+  const entrypoint = process.env.NEXT_PUBLIC_ENTRYPOINT_ADDRESS;
+  const scope = process.env.NEXT_PUBLIC_POOL_SCOPE;
+  const block = process.env.NEXT_PUBLIC_DEPLOYMENT_BLOCK;
+  if (!pool || !entrypoint || !scope || !block) throw new Error('Incomplete self-hosted deployment configuration');
+  return {
+    [SELF_HOSTED_CHAIN.id]: {
+      ...testnetChainData[sepolia.id],
+      name: SELF_HOSTED_CHAIN.name,
+      rpcUrl: '/api/sepolia-rpc',
+      sdkRpcUrl: '/api/sepolia-rpc',
+      relayers: [
+        { name: 'Self-hosted test relay', url: process.env.NEXT_PUBLIC_RELAYER_URL || 'http://127.0.0.1:3001' },
+      ],
+      poolInfo: [
+        {
+          ...testnetChainData[sepolia.id].poolInfo[0],
+          chainId: SELF_HOSTED_CHAIN.id,
+          address: pool as Address,
+          entryPointAddress: entrypoint as Address,
+          scope: BigInt(scope),
+          deploymentBlock: BigInt(block),
+        },
+      ],
+    },
+  };
+};
+
+export const chainData = applyCustomRpcOverrides(
+  SELF_HOSTED ? selfHostedChainData() : IS_TESTNET ? testnetChainData : mainnetChainData,
+);
 
 // The ASP root is per entrypoint, so every pool behind an entrypoint that has a
 // Brevis pool must prove against the merged 0xbow + Brevis leaves.
@@ -702,6 +736,7 @@ export const getBrevisAspLeavesConfig = (pool: PoolInfo): ExternalAspConfig | un
 // Chain data for All Pools table (includes test chains if SHOW_TEST_CHAINS is enabled)
 export const allPoolsChainData: ChainData = applyCustomRpcOverrides(
   (() => {
+    if (SELF_HOSTED) return selfHostedChainData();
     if (IS_TESTNET) {
       return testnetChainData;
     }
